@@ -9,6 +9,9 @@ For running the script you need to provide 3 inputs. The inputs are nonce, value
 
 See [./exec.js](./scripts/exec.js) for inline explanation.
 
+Note that you can use [Arbiscan](https://arbiscan.io/) and its [API](https://arbiscan.io/apis) to find `nonce`, `balance` of your L2 address at the time of Merge event and use them to call the script. 
+
+
 To run:
 
 ```
