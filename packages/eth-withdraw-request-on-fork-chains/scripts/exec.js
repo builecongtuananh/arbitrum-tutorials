@@ -2,6 +2,7 @@ const { ethers, providers, Wallet } = require('ethers')
 const { arbLog, requireEnvVariables } = require('arb-shared-dependencies')
 const { bigIntToUnpaddedBuffer } = require('@ethereumjs/util')
 const rlp = require('rlp')
+const fetch = require('node-fetch')
 require('dotenv').config()
 requireEnvVariables(['DEVNET_PRIVKEY', 'L1RPC'])
 
@@ -88,9 +89,33 @@ module.exports = async (nonce, value, address) => {
    * Casting value, which is provided on input, from string to big number type
    */
   const maxFeePerGas = ethers.utils.parseUnits('0.12', 'gwei')
-  const nonceNumber = Number(nonce)
-  const valueBN = await ethers.BigNumber.from(value)
   const maxGas = 100000
+  const nonceNumber = Number(nonce)
+  let valueBN
+  if (value === 'all') {
+    const l2forkblock = process.env.L2FORKBLOCK
+    if (l2forkblock === undefined) {
+      throw new Error('L2FORKBLOCK is not set')
+    }
+    value = (
+      await (
+        await fetch(
+          `https://api.arbiscan.io/api?module=account&action=balance&address=${address}&tag=0x${l2forkblock.toString(
+            16
+          )}`
+        )
+      ).json()
+    ).result
+    console.log(`Your balance at fork block is: ${value}`)
+    valueBN = ethers.BigNumber.from(value).sub(
+      ethers.BigNumber.from(maxFeePerGas).mul(maxGas)
+    )
+  } else {
+    valueBN = ethers.BigNumber.from(value)
+  }
+  if (valueBN.lte(0)) {
+    throw new Error('Value should be greater than 0')
+  }
 
   /**
    * Sending ETH withdraw request to Delayed Inbox contract calling sendWithdrawEthToFork method
