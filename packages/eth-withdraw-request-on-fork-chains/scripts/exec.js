@@ -175,9 +175,11 @@ module.exports = async (nonce, value, address) => {
   )
 
   // Sending a self transfer to increment the blocknumber to avoid ForceIncludeBlockTooSoon error
-  await (await l1Wallet.sendTransaction({
-    to: l1Wallet.address,
-  })).wait()
+  await (
+    await l1Wallet.sendTransaction({
+      to: l1Wallet.address,
+    })
+  ).wait()
 
   /**
    * Calling "forceInclusion" function of the Sequencer Inbox contract to force include the delayed message(s)
@@ -209,5 +211,4 @@ module.exports = async (nonce, value, address) => {
       batchSequenceNumber
     )} in transaction with transaction hash ${await txRec2.transactionHash} 🫡🫡`
   )
-
 }
