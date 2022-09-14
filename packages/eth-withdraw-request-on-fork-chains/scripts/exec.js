@@ -28,9 +28,10 @@ const sequencerAbi = [
  * For testings:
  * 1. Change these addresses each time running Nitro node
  * 2. Change them to Arbitrum One addresses after testing
+ * The below pre-configured value is for Arbitrum One
  */
-const inboxAddress = '0x855bfae57a08b00a6f5802fdfd232cf4cd182a43'
-const sequencerAddress = '0xa25d1eac5d0b35eccf2cba76af0d19aa2f0882b4'
+const inboxAddress = '0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f'
+const sequencerAddress = '0x1c479675ad559dc151f6ec7ed3fbf8cee79582b6'
 
 module.exports = async (nonce, value, address) => {
   const chainid = (await l1Provider.getNetwork()).chainId
