@@ -178,8 +178,8 @@ module.exports = async (nonce, value, address) => {
 
   // we can only call forceInclusion after 1 block has passed
   if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
-    // wait for 30 seconds
-    await new Promise(resolve => setTimeout(resolve, 30000))
+    // wait for 30 seconds unless in hardhat fork
+    if (chainid !== 31337) await new Promise(resolve => setTimeout(resolve, 30000))
     // check to see if there are any new blocks on L1
     if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
       // there are no new block, sending a self transfer to make a new block
