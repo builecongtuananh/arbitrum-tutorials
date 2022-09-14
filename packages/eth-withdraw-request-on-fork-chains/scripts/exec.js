@@ -33,6 +33,11 @@ const inboxAddress = '0x855bfae57a08b00a6f5802fdfd232cf4cd182a43'
 const sequencerAddress = '0xa25d1eac5d0b35eccf2cba76af0d19aa2f0882b4'
 
 module.exports = async (nonce, value, address) => {
+  const chainid = (await l1Provider.getNetwork()).chainId
+  console.log(chainid)
+  if (chainid === 1) {
+    throw new Error('Do not run this on Mainnet')
+  }
   await arbLog('ETH Withdrawal Request on Fork chain')
 
   /**
