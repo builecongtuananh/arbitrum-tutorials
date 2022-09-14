@@ -5,8 +5,8 @@ const main = require('./scripts/exec.js')
 const { task } = require('hardhat/config.js')
 
 task('withdraw-eth', 'Withdrawing ETH from fork chain')
-  .addParam('nonce', 'Users nonce on L2')
-  .addParam('value', 'Value for withdrawal')
+  .addParam('nonce', 'Users nonce to use on L2')
+  .addParam('value', 'Value for withdrawal (in wei)')
   .addParam('address', 'Destination address of the withdrawal')
 
   .setAction(async args => {
