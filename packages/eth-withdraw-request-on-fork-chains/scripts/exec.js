@@ -101,7 +101,7 @@ module.exports = async (nonce, value, address) => {
     maxFeePerGas,
     nonceNumber,
     valueBN,
-    address.toString()
+    address
   )
 
   /**
