@@ -1,5 +1,7 @@
 const { ethers, providers, Wallet } = require('ethers')
 const { arbLog, requireEnvVariables } = require('arb-shared-dependencies')
+const { bigIntToUnpaddedBuffer } = require('@ethereumjs/util')
+const rlp = require('rlp')
 require('dotenv').config()
 requireEnvVariables(['DEVNET_PRIVKEY', 'L1RPC'])
 
@@ -32,6 +34,7 @@ const sequencerAbi = [
  */
 const inboxAddress = '0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f'
 const sequencerInboxAddress = '0x1c479675ad559dc151f6ec7ed3fbf8cee79582b6'
+const l2chainid = 42161
 
 module.exports = async (nonce, value, address) => {
   const chainid = (await l1Provider.getNetwork()).chainId
@@ -87,6 +90,7 @@ module.exports = async (nonce, value, address) => {
   const maxFeePerGas = ethers.utils.parseUnits('0.12', 'gwei')
   const nonceNumber = Number(nonce)
   const valueBN = await ethers.BigNumber.from(value)
+  const maxGas = 100000
 
   /**
    * Sending ETH withdraw request to Delayed Inbox contract calling sendWithdrawEthToFork method
@@ -97,7 +101,7 @@ module.exports = async (nonce, value, address) => {
    * @param withdrawTo the address user provided as destination address
    */
   const tx2 = await inboxContract.sendWithdrawEthToFork(
-    100000,
+    maxGas,
     maxFeePerGas,
     nonceNumber,
     valueBN,
@@ -179,7 +183,8 @@ module.exports = async (nonce, value, address) => {
   // we can only call forceInclusion after 1 block has passed
   if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
     // wait for 30 seconds unless in hardhat fork
-    if (chainid !== 31337) await new Promise(resolve => setTimeout(resolve, 30000))
+    if (chainid !== 31337)
+      await new Promise(resolve => setTimeout(resolve, 30000))
     // check to see if there are any new blocks on L1
     if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
       // there are no new block, sending a self transfer to make a new block
@@ -221,4 +226,23 @@ module.exports = async (nonce, value, address) => {
       batchSequenceNumber
     )} in transaction with transaction hash ${await txRec2.transactionHash} 🫡🫡`
   )
+
+  // havn't tested this yet
+  // https://github.com/OffchainLabs/go-ethereum/blob/2098a1668af945a81f5adb807387445693521a34/core/types/arb_types.go#L43-L53
+  const ArbitrumUnsignedTxType = 101
+  const txdata = `0x25e16063000000000000000000000000${address.substring(2)}`
+  const txrlpbuffer = Buffer.concat([
+    new Uint8Array([ArbitrumUnsignedTxType]),
+    rlp.encode([
+      bigIntToUnpaddedBuffer(BigInt(l2chainid)),
+      l1Wallet.address,
+      bigIntToUnpaddedBuffer(BigInt(nonceNumber)),
+      bigIntToUnpaddedBuffer(BigInt(maxFeePerGas)),
+      bigIntToUnpaddedBuffer(BigInt(maxGas)),
+      '0x0000000000000000000000000000000000000064',
+      bigIntToUnpaddedBuffer(BigInt(valueBN)),
+      txdata,
+    ]),
+  ])
+  console.log('Expected tx hash on L2:', ethers.utils.keccak256(txrlpbuffer))
 }
