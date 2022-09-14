@@ -176,12 +176,20 @@ module.exports = async (nonce, value, address) => {
     '-------------------------------------------------------------------'
   )
 
-  // Sending a self transfer to increment the blocknumber to avoid ForceIncludeBlockTooSoon error
-  await (
-    await l1Wallet.sendTransaction({
-      to: l1Wallet.address,
-    })
-  ).wait()
+  // we can only call forceInclusion after 1 block has passed
+  if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
+    // wait for 30 seconds
+    await new Promise(resolve => setTimeout(resolve, 30000))
+    // check to see if there are any new blocks on L1
+    if ((await l1Provider.getBlockNumber()) < blockNumber + 1) {
+      // there are no new block, sending a self transfer to make a new block
+      await (
+        await l1Wallet.sendTransaction({
+          to: l1Wallet.address,
+        })
+      ).wait()
+    }
+  }
 
   /**
    * Calling "forceInclusion" function of the Sequencer Inbox contract to force include the delayed message(s)
