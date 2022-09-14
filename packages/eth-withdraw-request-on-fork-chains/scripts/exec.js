@@ -173,38 +173,35 @@ module.exports = async (nonce, value, address) => {
     '-------------------------------------------------------------------'
   )
 
-  try {
-    /**
-     * Calling "forceInclusion" function of the Sequencer Inbox contract to force include the delayed message(s)
-     * @param totalmessages total delayed messages
-     * @param blockNumberAndTime Block number and timestamp of the latest delayed message
-     * @param l1BaseFee L1 base fee of the latest delayed message
-     * @param sender sender of the latest delayed message
-     * @param messageDataHash message data hash of the latest delayed message
-     */
-    const tx3 = await sequenceContract.forceInclusion(
-      totalmessages,
-      ethers.BigNumber.from(messageType),
-      blockNumberAndTime,
-      l1BaseFee,
-      senderAddress,
-      messageDataHash
-    )
-    const txRec2 = await tx3.wait()
+  /**
+   * Calling "forceInclusion" function of the Sequencer Inbox contract to force include the delayed message(s)
+   * @param totalmessages total delayed messages
+   * @param blockNumberAndTime Block number and timestamp of the latest delayed message
+   * @param l1BaseFee L1 base fee of the latest delayed message
+   * @param sender sender of the latest delayed message
+   * @param messageDataHash message data hash of the latest delayed message
+   */
+  const tx3 = await sequenceContract.forceInclusion(
+    totalmessages,
+    ethers.BigNumber.from(messageType),
+    blockNumberAndTime,
+    l1BaseFee,
+    senderAddress,
+    messageDataHash
+  )
+  const txRec2 = await tx3.wait()
 
-    /**
-     * "forceInclusion" function will emit "SequencerBatchDelivered" event (https://github.com/OffchainLabs/nitro/blob/e907320733dafda6d22db6928b09227a4b2f61a5/contracts/src/bridge/ISequencerInbox.sol#L34-L42)
-     * The second topic of the log returns batchSequenceNumber
-     * We'll show the batch sequence number and the transaction hash in which the force inclusion is done
-     */
-    const SequencerBatchDeliveredLog = await txRec2.logs[0]
-    const batchSequenceNumber = SequencerBatchDeliveredLog.topics[1]
-    console.log(
-      `Your withdrawal request is successfully force included with batch sequence number ${Number(
-        batchSequenceNumber
-      )} in transaction with transaction hash ${await txRec2.transactionHash} 🫡🫡`
-    )
-  } catch (err) {
-    console.log(err)
-  }
+  /**
+   * "forceInclusion" function will emit "SequencerBatchDelivered" event (https://github.com/OffchainLabs/nitro/blob/e907320733dafda6d22db6928b09227a4b2f61a5/contracts/src/bridge/ISequencerInbox.sol#L34-L42)
+   * The second topic of the log returns batchSequenceNumber
+   * We'll show the batch sequence number and the transaction hash in which the force inclusion is done
+   */
+  const SequencerBatchDeliveredLog = await txRec2.logs[0]
+  const batchSequenceNumber = SequencerBatchDeliveredLog.topics[1]
+  console.log(
+    `Your withdrawal request is successfully force included with batch sequence number ${Number(
+      batchSequenceNumber
+    )} in transaction with transaction hash ${await txRec2.transactionHash} 🫡🫡`
+  )
+
 }
