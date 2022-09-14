@@ -35,9 +35,11 @@ const sequencerInboxAddress = '0x1c479675ad559dc151f6ec7ed3fbf8cee79582b6'
 
 module.exports = async (nonce, value, address) => {
   const chainid = (await l1Provider.getNetwork()).chainId
-  console.log(chainid)
   if (chainid === 1) {
     throw new Error('Do not run this on Mainnet')
+  }
+  if (ethers.utils.isAddress(address) === false) {
+    throw new Error('Invalid destination address')
   }
   await arbLog('ETH Withdrawal Request on Fork chain')
 
