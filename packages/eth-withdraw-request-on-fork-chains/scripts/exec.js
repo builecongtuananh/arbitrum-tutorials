@@ -31,7 +31,7 @@ const sequencerAbi = [
  * The below pre-configured value is for Arbitrum One
  */
 const inboxAddress = '0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f'
-const sequencerAddress = '0x1c479675ad559dc151f6ec7ed3fbf8cee79582b6'
+const sequencerInboxAddress = '0x1c479675ad559dc151f6ec7ed3fbf8cee79582b6'
 
 module.exports = async (nonce, value, address) => {
   const chainid = (await l1Provider.getNetwork()).chainId
@@ -46,7 +46,7 @@ module.exports = async (nonce, value, address) => {
    */
   const inboxContract = new ethers.Contract(inboxAddress, inboxAbi, l1Wallet)
   const sequenceContract = new ethers.Contract(
-    sequencerAddress,
+    sequencerInboxAddress,
     sequencerAbi,
     l1Wallet
   )
