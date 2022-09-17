@@ -1,9 +1,4 @@
 const { utils, providers, Wallet, ethers } = require('ethers')
-const {
-  EthBridger,
-  getL2Network,
-  L1ToL2MessageStatus,
-} = require('@arbitrum/sdk')
 const { parseEther } = utils
 const { arbLog, requireEnvVariables } = require('arb-shared-dependencies')
 require('dotenv').config()
@@ -15,10 +10,8 @@ requireEnvVariables(['DEVNET_PRIVKEY', 'L1RPC', 'L2RPC'])
 const walletPrivateKey = process.env.DEVNET_PRIVKEY
 
 const l1Provider = new providers.JsonRpcProvider(process.env.L1RPC)
-const l2Provider = new providers.JsonRpcProvider(process.env.L2RPC)
 
 const l1Wallet = new Wallet(walletPrivateKey, l1Provider)
-const l2Wallet = new Wallet(walletPrivateKey, l2Provider)
 const inboxAddress = '0x6BEbC4925716945D46F0Ec336D5C2564F419682C'
 const abi = [
   'function calculateRetryableSubmissionFee(uint256,uint256) public view returns (uint256)',
@@ -37,7 +30,6 @@ const main = async () => {
    * We'll use EthBridger for its convenience methods around transferring ETH to L2
    */
 
-  const l2Network = await getL2Network(l2Provider)
   const zeroAmount = ethers.BigNumber.from(0)
   const inboxContract = new ethers.Contract(inboxAddress, abi, l1Wallet)
   const maxSubmissionCost = await inboxContract.calculateRetryableSubmissionFee(
